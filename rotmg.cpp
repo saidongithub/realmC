@@ -86,10 +86,8 @@ int main(){
         return -1;
     }
 
-	//assets
 	players = asset_load("players.png");
 
-	//if assets fail, return error
 	if(!(players)){
 		printf("Failed to load asset\n");
 		return -1;
@@ -232,32 +230,13 @@ int main(){
 				shooting = 0;
 			}
 		}
-		//draws hud
+		/* draw hud */
 		int hud_x = window_width - hud_width;
 		doge_setcolor(0.5, 0.5, 0.5);
 		doge_fill_rectangle(hud_x, 0, hud_width, window_height);
 		doge_setcolor(1, 1, 1);
-		/*draws character
-		if(shooting){
-			if(direction != 3){
-				doge_draw_image_section(players -> image, (shooting + 3) * 8, (direction + charClass) * 8, shooting * 8, 8, player_x, player_y, char_size * shooting, char_size);
-			} else{
-				doge_draw_image_section(players -> image, (shooting + 3) * 8, charClass * 8, shooting * 8, 8, player_x + char_size, player_y, -char_size * shooting, char_size);
-			}
-		} else
-		if(moving){
-			if(direction != 3){
-				doge_draw_image_section(players -> image, 8 * moving, (direction + charClass) * 8, 8, 8, player_x, player_y, char_size, char_size);
-			} else{
-				doge_draw_image_section(players -> image, 0, 0, 8, 8, player_x, player_y, char_size, char_size);
-			}
-		} else
-		if(direction != 3){
-			doge_draw_image_section(players -> image, 0, (direction + charClass) * 8, 8, 8, player_x, player_y, char_size, char_size);
-		} else{
-			doge_draw_image_section(players -> image, 0, (direction + charClass) * 8, 8, 8, player_x, player_y, char_size, char_size);
-		}
-		*/
+
+		/* draw character */
 		draw_character(direction, shooting, moving);
 
         /* swap the frame buffer */
