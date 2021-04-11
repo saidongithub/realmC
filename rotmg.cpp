@@ -9,11 +9,50 @@
 #include "asset.h"
 #include "nanotime.h"
 
-void draw_character(int direction, bool shooting, bool moving){
-	if(shooting){
+asset* players;
 
+int scaling = 100;
+
+const int char_size = 32;
+short charClass;
+
+const int window_width = 16 * scaling;
+const int window_height = 9 * scaling;
+
+const int camera_width = 12 * scaling;
+const int hud_width = 4 * scaling - 1;
+
+const int player_x = (camera_width - char_size)/ 2;
+const int player_y = (window_height - char_size)/ 2;
+
+void draw_character(int direction, bool shooting, bool moving){
+	int ix = 0;
+	int iy = charClass * 8;
+	int iwidth = 8;
+	int x = player_x;
+	if(!shooting){
+		if(moving){
+			ix = moving * 8;
+			if(!(direction % 2)){
+				ix -= 8;
+			}
+		} else{
+			iy += direction * 8;
+		}
+	} else{
+		if(shooting == 2){
+			iwidth = 16;
+		}
 	}
-	//doge_draw_image_section(players -> image, 0, 0, 8, 8, player_x, player_y, char_size, char_size);
+	int width = iwidth;
+	if(direction == 3){
+		width = width * -1;
+		x += char_size;
+		if(iy - charClass * 8 == 3 * 8){
+			iy = charClass * 8;
+		}
+	}
+	doge_draw_image_section(players -> image, ix, iy, iwidth, 8, x, player_y, width, char_size);
 }
 
 int main(){
@@ -28,19 +67,6 @@ int main(){
     }
 
     doge_window_t* window;
-
-	int scaling = 100;
-
-	int char_size = 32;
-
-	const int window_width = 16 * scaling;
-	const int window_height = 9 * scaling;
-
-	const int camera_width = 12 * scaling;
-	const int hud_width = 4 * scaling - 1;
-
-	const int player_x = (camera_width - char_size)/ 2;
-	const int player_y = (window_height - char_size)/ 2;
 
     window = doge_window_create("Realm of the Mad God C", window_width, window_height);
 
@@ -62,7 +88,7 @@ int main(){
     }
 
 	//assets
-	asset* players = asset_load("players.png");
+	players = asset_load("players.png");
 
 	//if assets fail, return error
 	if(!(players)){
@@ -93,7 +119,7 @@ int main(){
 	short directionX = 0;
 	short directionY = 0;
 
-	const short charClass = 3 * 0;
+	charClass = 3 * 0;
 
 	const int tps = 30;
     unsigned long lasttime, now, passed, totalTimepassedTicks;
@@ -219,8 +245,8 @@ int main(){
 			}
 		} else
 		if(moving){
-			if(direction % 2){
-				doge_draw_image_section(players -> image, 8, (direction + charClass) * 8, 8, 8, player_x, player_y, char_size, char_size);
+			if(direction != 3){
+				doge_draw_image_section(players -> image, 8 * moving, (direction + charClass) * 8, 8, 8, player_x, player_y, char_size, char_size);
 			} else{
 				doge_draw_image_section(players -> image, 0, 0, 8, 8, player_x, player_y, char_size, char_size);
 			}
