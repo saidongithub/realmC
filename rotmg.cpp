@@ -25,32 +25,31 @@ const int hud_width = 4 * scaling - 1;
 const int player_x = (camera_width - char_size)/ 2;
 const int player_y = (window_height - char_size)/ 2;
 
-void draw_character(int direction, bool shooting, bool moving){
+void draw_character(short direction, int shooting, int moving){
 	int ix = 0;
 	int iy = charClass * 8;
 	int iwidth = 8;
+	int width = char_size;
 	int x = player_x;
 	if(!shooting){
 		if(moving){
 			ix = moving * 8;
-			if(!(direction % 2)){
+			if(!(direction % 3)){
 				ix -= 8;
 			}
 		} else{
-			iy += direction * 8;
+			ix = 0;
 		}
 	} else{
-		if(shooting == 2){
-			iwidth = 16;
-		}
+		ix = (shooting + 3) * 8;
+		iwidth = shooting * 8;
+		width = shooting * char_size;
 	}
-	int width = iwidth;
+	iy += direction * 8;
 	if(direction == 3){
 		width = width * -1;
 		x += char_size;
-		if(iy - charClass * 8 == 3 * 8){
-			iy = charClass * 8;
-		}
+		iy -= 3 * 8;
 	}
 	doge_draw_image_section(players -> image, ix, iy, iwidth, 8, x, player_y, width, char_size);
 }
@@ -127,8 +126,6 @@ int main(){
     lasttime = nanotime();
 	int tick = 0;
 
-	int ix = 0;
-	int iy = 0;
     while(!doge_window_shouldclose(window)){
         /* clear the window */
         doge_clear();
@@ -161,10 +158,10 @@ int main(){
 		}
 		if(directionX || directionY){
 			if(movetick < 15){
-				moving = 1;
+				moving = 2;
 			} else
 			if(movetick <= 30){
-				moving = 2;
+				moving = 1;
 			} else{
 				movetick = -1;
 			}
@@ -173,7 +170,7 @@ int main(){
 				direction = 0;
 			}
 			if(directionX < 0){
-				direction = 4;
+				direction = 3;
 			}
 			if(directionY > 0){
 				direction = 2;
@@ -181,6 +178,9 @@ int main(){
 			if(directionY < 0){
 				direction = 1;
 			}
+		} else{
+			moving = 0;
+			movetick = 0;
 		}
 
 		/* check mouse input */
@@ -234,9 +234,10 @@ int main(){
 		}
 		//draws hud
 		int hud_x = window_width - hud_width;
+		doge_setcolor(0.5, 0.5, 0.5);
 		doge_fill_rectangle(hud_x, 0, hud_width, window_height);
-
-		//draws character
+		doge_setcolor(1, 1, 1);
+		/*draws character
 		if(shooting){
 			if(direction != 3){
 				doge_draw_image_section(players -> image, (shooting + 3) * 8, (direction + charClass) * 8, shooting * 8, 8, player_x, player_y, char_size * shooting, char_size);
@@ -256,7 +257,8 @@ int main(){
 		} else{
 			doge_draw_image_section(players -> image, 0, (direction + charClass) * 8, 8, 8, player_x, player_y, char_size, char_size);
 		}
-
+		*/
+		draw_character(direction, shooting, moving);
 
         /* swap the frame buffer */
         doge_window_render(window);
