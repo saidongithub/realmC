@@ -9,15 +9,27 @@
 #include "asset.h"
 #include "nanotime.h"
 
+enum direction_e{
+	RIGHT,
+	DOWN,
+	UP,
+	LEFT
+};
+
+typedef enum direction_e direction;
+
+direction facing;
+
 asset* players;
 
-int scaling = 100;
+const int scaling = 100;
+const int char_size = 64;
+int charClass;
 
-const int char_size = 32;
-short charClass;
-
-const int window_width = 16 * scaling;
-const int window_height = 9 * scaling;
+const int aspectx = 16;
+const int aspecty = 9;
+const int window_width = (aspectx * scaling);
+const int window_height = (aspecty * scaling);
 
 const int camera_width = 12 * scaling;
 const int hud_width = 4 * scaling - 1;
@@ -25,7 +37,11 @@ const int hud_width = 4 * scaling - 1;
 const int player_x = (camera_width - char_size)/ 2;
 const int player_y = (window_height - char_size)/ 2;
 
-void draw_character(short direction, int shooting, int moving){
+void draw_(){
+
+}
+
+void draw_character(int shooting, int moving){
 	int ix = 0;
 	int iy = charClass * 8;
 	int iwidth = 8;
@@ -34,7 +50,7 @@ void draw_character(short direction, int shooting, int moving){
 	if(!shooting){
 		if(moving){
 			ix = moving * 8;
-			if(!(direction % 3)){
+			if(!(facing % 3)){
 				ix -= 8;
 			}
 		} else{
@@ -45,8 +61,8 @@ void draw_character(short direction, int shooting, int moving){
 		iwidth = shooting * 8;
 		width = shooting * char_size;
 	}
-	iy += direction * 8;
-	if(direction == 3){
+	iy += facing * 8;
+	if(facing == LEFT){
 		width = width * -1;
 		x += char_size;
 		iy -= 3 * 8;
@@ -97,26 +113,25 @@ int main(){
 	//mass declaration of variables
 	int mouse_x, mouse_y;
 
-	short selected_x = 0;
-	short selected_y = 0;
+	int selected_x = 0;
+	int selected_y = 0;
 
 	bool mouse_clicked = false;
-	short click_x = 0;
-	short click_y = 0;
-	short release_x = 0;
-	short release_y = 0;
+	int click_x = 0;
+	int click_y = 0;
+	int release_x = 0;
+	int release_y = 0;
 
-	short shooting = 0;
-	short shootick = 0;
+	int shooting = 0;
+	int shootick = 0;
 
-	short moving = 0;
-	short movetick = 0;
+	int moving = 0;
+	int movetick = 0;
 
-	short direction = 0;
-	short directionX = 0;
-	short directionY = 0;
+	int directionX = 0;
+	int directionY = 0;
 
-	charClass = 3 * 0;
+	charClass = 0;
 
 	const int tps = 30;
     unsigned long lasttime, now, passed, totalTimepassedTicks;
@@ -164,17 +179,34 @@ int main(){
 				movetick = -1;
 			}
 			movetick++;
-			if(directionX > 0){
-				direction = 0;
-			}
-			if(directionX < 0){
-				direction = 3;
-			}
-			if(directionY > 0){
-				direction = 2;
-			}
-			if(directionY < 0){
-				direction = 1;
+			if(directionX && directionY){
+			/* diagonal movement */
+				if(directionX > 0){
+					if(directionY > 0){
+						facing = UP;
+					} else{
+						facing = RIGHT;
+					}
+				} else
+				if(directionY > 0){
+					facing = LEFT;
+				} else{
+					facing = DOWN;
+				}
+			} else{
+			/* vertical/horizontal movement */
+				if(directionX > 0){
+					facing = RIGHT;
+				} else
+				if(directionY < 0){
+					facing = DOWN;
+				} else
+				if(directionY > 0){
+					facing = UP;
+				} else
+				if(directionX < 0){
+					facing = LEFT;
+				}
 			}
 		} else{
 			moving = 0;
@@ -189,15 +221,14 @@ int main(){
 			if(mouse_clicked != doge_window_mousepressed(window, DOGE_MOUSE_BUTTON_LEFT)){
 				//if leftmouse pushed
 				if(!mouse_clicked){
-					click_x = (short)mouse_x;
-					click_y = (short)mouse_y;
+					click_x = mouse_x;
+					click_y = mouse_y;
 				}
 				//if leftmouse released
 				else {
-					release_x = (short)mouse_x;
-					release_y = (short)mouse_y;
+					release_x = (int)mouse_x;
+					release_y = (int)mouse_y;
 				}
-
 				mouse_clicked = doge_window_mousepressed(window, DOGE_MOUSE_BUTTON_LEFT);
 			}
 			//if leftmouse down
@@ -219,25 +250,36 @@ int main(){
 					2 = up
 					3 = left */
 					//if mouse is top-left of window
-					direction = 0;
+					facing = RIGHT;
 					if((camera_width - mouse_x) * 3 >= mouse_y * 4)
-						direction = 2;
+						facing = UP;
 					//if mouse is bottom-left of window
 					if(mouse_x * 3 <= mouse_y * 4)
-						direction++;
+						facing = (direction)((int)facing + 1);
 				}
 			} else{
 				shooting = 0;
 			}
 		}
 		/* draw hud */
-		int hud_x = window_width - hud_width;
-		doge_setcolor(0.5, 0.5, 0.5);
-		doge_fill_rectangle(hud_x, 0, hud_width, window_height);
-		doge_setcolor(1, 1, 1);
+		if(charClass == -1){
+			for(int y = 0; y < 4; y++){
+				for(int x = 0; x < 5; x++){
+					if(mouse_x)
+					doge_setcolor(0.5, 0.5, 0.5);
+					doge_fill_rectangle(aspectx * (scaling / 5) * x + (aspectx * scaling / 20), aspecty * (scaling / 4) * y, (aspecty - 1) * 20, (aspecty - 1) * 20);
+					doge_setcolor(1, 1, 1);
+					doge_draw_image_section(players -> image, 0, 3 * 8 * (y * 5 + x), 8, 8, 16 * 20 * x + 16 * 5 + char_size / 2, aspecty * (scaling / 4) * y + 16, char_size * 4, char_size * 4);
+				}
+			}
+		} else{
+			int hud_x = window_width - hud_width;
+			doge_fill_rectangle(hud_x, 0, hud_width, window_height);
+			doge_setcolor(1, 1, 1);
 
-		/* draw character */
-		draw_character(direction, shooting, moving);
+			/* draw character */
+			draw_character(shooting, moving);
+		}
 
         /* swap the frame buffer */
         doge_window_render(window);
