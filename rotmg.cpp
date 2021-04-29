@@ -20,6 +20,16 @@ typedef enum direction_e direction;
 
 direction facing;
 
+enum state_e{
+	CHARSELECT,
+	GAME,
+	DEATH
+};
+
+typedef enum state_e state;
+
+state gamestate;
+
 asset* players;
 
 const int scaling = 100;
@@ -37,8 +47,12 @@ const int hud_width = 4 * scaling - 1;
 const int player_x = (camera_width - char_size)/ 2;
 const int player_y = (window_height - char_size)/ 2;
 
-void draw_(){
-
+void draw_charselect(int mouse_x, int mouse_y){
+	for(int x = 0; x < 5; x++){
+		for(int y = 0; y < 4; y++){
+			//draw char selection
+		}
+	}
 }
 
 void draw_character(int shooting, int moving){
